@@ -22,7 +22,11 @@ class Operation:
 		
 	def Print(self):
 		print("Operator:", self.operator, "branches:", self.operands_index, "	is leaf?", self.leaf)
-
+"""
+Rekurzivne volana funkce.
+Vraci "listy", s kazdym dalsim zavolanim propaguje koncove urovne vys a vys,
+tim se vytvari priklad. 
+"""
 def makeLeaf(operation, idx):
 	# je to list
 	#if operation[idx].leaf == True:
@@ -44,6 +48,9 @@ def Colaps(operation):
 	example = makeLeaf(operation, 0)
 	return example
 
+"""
+Prevadi slozena pole do jedno dimenzionalniho pole.
+"""
 def One_array(struct):
 	tangled = True
 	while tangled:
@@ -60,6 +67,10 @@ def One_array(struct):
 			
 	return struct
 	
+"""
+Generuje obtizne priklady
+Vraci 1D pole s polozkymi tvorici priklad.
+"""
 def hardGener(settings):
 	operation = []
 	leafs = 1
@@ -103,9 +114,10 @@ def hardGener(settings):
 		leafs = leafs -1
 		
 	# kontrolni tisk
-	for i in range(len(operation)):
-		print("Index:", i, ":", end='')
-		operation[i].Print()
+	if DEBUG:
+		for i in range(len(operation)):
+			print("Index:", i, ":", end='')
+			operation[i].Print()
 	
 	# colaps
 	if DEBUG:
@@ -122,6 +134,10 @@ def hardGener(settings):
 	
 	return array
 
+def Degre_to_rad (degre):
+	rad = degre/180 * math.pi
+	return rad
+
 def Solve(operation, index1, index2):
 	# vnitrek
 	if len(operation) > 3:
@@ -131,9 +147,9 @@ def Solve(operation, index1, index2):
 	
 	# vnejsek
 	if operation[index1] == "sin(":
-		operation[index1+1] = math.sin(operation[index1+1])
+		operation[index1+1] = math.sin(Degre_to_rad(operation[index1+1]))
 	elif operation[index1] == "cos(":
-		operation[index1+1] = math.cos(operation[index1+1])
+		operation[index1+1] = math.cos(Degre_to_rad(operation[index1+1]))
 	
 	# ostraneni zavorek
 	del operation[index1]
@@ -305,7 +321,8 @@ class Settings:
 		print("Min: ", self.minimum);
 		print("Max: ", self.maximum);
 		print("Number of examples: ", self.number_of_examples);
-		
+	
+	# vytiskne vsechny vygenerovna priklady	
 	def Print_examples(self):
 		for i in range(self.number_of_examples):
 			self.examples[i].Print()
