@@ -277,7 +277,30 @@ class Example:
 		#print(" ---Example---")
 		for operant in self.operation:
 			print (operant,"", end='')
-		print("=", self.result);
+		print("=", self.result)
+		
+	def Print_to_string_all(self):
+		string = " "
+		for operant in self.operation:
+			string = string+str(operant)
+			string = string+" "
+		string = string+"= "
+		string = string+str(round(self.result, 3))
+		return string
+	
+	def Print_to_string_examples(self):
+		string = " "
+		for operant in self.operation:
+			string = string+str(operant)
+			string = string+" "
+		string = string+"= "
+		return string
+	
+	def Print_to_string_results(self):
+		string = " "
+		string = string+"= "
+		string = string+str(round(self.result, 3))
+		return string
 	
 
 class Settings:
@@ -326,6 +349,33 @@ class Settings:
 	def Print_examples(self):
 		for i in range(self.number_of_examples):
 			self.examples[i].Print()
+	
+	def Save_all(self):
+		file = open('all.txt', 'w')
+		for i in range(self.number_of_examples):
+			file.write(str(i))
+			file.write(":	")
+			file.write(self.examples[i].Print_to_string_all() )
+			file.write("\n")
+		file.close()
 		
-
+	def Save_examples(self):
+		file = open('examples.txt', 'w')
+		for i in range(self.number_of_examples):
+			file.write(str(i))
+			file.write(":	")
+			file.write(self.examples[i].Print_to_string_examples() )
+			file.write("\n")
+		file.close()
+		
+	def Save_results(self):
+		file = open('results.txt', 'w')
+		for i in range(self.number_of_examples):
+			file.write(str(i))
+			file.write(":	")
+			file.write(self.examples[i].Print_to_string_results() )
+			file.write("\n")
+		file.close()
+		
+	
 
