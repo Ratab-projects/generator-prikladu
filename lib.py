@@ -5,6 +5,8 @@ DEBUG = False
 
 operations = "+-*/"
 
+trivial_operations = "+-"
+
 #				[name, number of operands, charakter(1/2 parts)]
 operators =   [ ["sinus", 1, "sin(", ")"], 
 				["cosinus", 1, "cos(", ")"], 
@@ -205,6 +207,14 @@ def easyGener(settings):
 		if operation[-2] == '/' and operation[-1] == 0:
 			operation[i*2] = 1
 	return operation
+	
+def trivialGener(settings):
+	operation = []
+	operation.append( random.randint(settings.minimum, settings.maximum) )
+	for i in range(1,settings.number_of_operants):
+		operation.append( random.choice(trivial_operations) )
+		operation.append( random.randint(settings.minimum, settings.maximum) )
+	return operation
 
 def Compute(param1, operation, param2):
 	if operation == "+":
@@ -269,17 +279,21 @@ class Example:
 		
 	# vygeneruje sekvenci prikladu
 	def Generate(self, settings):
-		if settings.difficulty == 1:
-			self.operation = easyGener(settings);
+		if settings.difficulty == 0:
+			self.operation = trivialGener(settings)
+		elif settings.difficulty == 1:
+			self.operation = easyGener(settings)
 		elif settings.difficulty == 2:
-			self.operation = hardGener(settings);
+			self.operation = hardGener(settings)
 	
 	# vypocita vygenerovany priklad
 	def Evaluate(self, settings):
-		if settings.difficulty == 1:
+		if settings.difficulty == 0:
+			self.result = easyEval(self.operation.copy(), 0, len(self.operation)-1)
+		elif settings.difficulty == 1:
 			self.result = easyEval(self.operation.copy(), 0, len(self.operation)-1)
 		elif settings.difficulty == 2:
-			self.result = hardEval(self.operation.copy());
+			self.result = hardEval(self.operation.copy())
 	
 	# vytiskne 
 	def Print(self):
@@ -344,7 +358,7 @@ class Settings:
 		self.maximum = int(input(" Set max: "))
 		
 		# operace
-		print("Operations (1: +/-/*/: | 2: all+sin()+cos() )")
+		print("Operations (0: +/- | 1: +/-/*/: | 2: all+sin()+cos() )")
 		self.difficulty = int(input(" Set operations: "))
 		self.number_of_operants = int(input(" Set number of operants: "))
 		
@@ -396,7 +410,5 @@ class Settings:
 			file.write(":	")
 			file.write(self.examples[i].Print_to_string_results() )
 			file.write("\n")
-		file.close()
-		
-	
+		file.close()	
 
