@@ -75,16 +75,25 @@ def hardGener(settings):
 	operation = []
 	leafs = 1
 	idx = 0
+	# obsahuje vyskyst vygenerovanych goniometrickych funkci
+	number_of_gon = 0
+	skip_goniometry = False
+	gon = ["sinus", "cosinus"]
 	# generate
 	if settings.number_of_operants >= 2:
 		operation.append(Operation())
 		#operation[0].Print()
 	while leafs < settings.number_of_operants:
-		operator = random.choice(operators)
-		#operation[idx].operator.append(operator[0])
-		
-		#print("Index:", idx, ":", end='')
-		#operation[idx].Print()
+		while True != False:
+			operator = random.choice(operators)
+			if operator[0] in gon:
+				print("Operation:", operator)
+				if number_of_gon != settings.number_of_goniometric:
+					number_of_gon = number_of_gon +1
+					break
+			else:
+				break
+			
 		leafs = leafs -1
 		if operator[1] == 1:	# unary
 			operation[idx].operator.append(operator[2])
@@ -306,12 +315,14 @@ class Example:
 class Settings:
 	# inicializace
 	def __init__(self):
+		self.name = ""
 		self.difficulty = 0
 		self.number_of_operants = 0
 		self.minimum = 0
 		self.maximum = 100
 		self.number_of_examples = 0
 		self.examples = []
+		self.number_of_goniometric = 1
 	
 	# uvolni pamet na konci programu	
 	def Kill(self):
@@ -323,13 +334,17 @@ class Settings:
 		print(" ---Settings--")
 		print("Set input parameters")
 		
+		# set name
+		print("Type name of this set: ")
+		self.name = input(" Set name: ")
+		
 		# number interval
-		print("Number interval: ");
+		print("Number interval: ")
 		self.minimum = int(input(" Set min: "))
 		self.maximum = int(input(" Set max: "))
 		
 		# operace
-		print("Operations (1: +/-/*/: | 2: all+sin()+cos() )");
+		print("Operations (1: +/-/*/: | 2: all+sin()+cos() )")
 		self.difficulty = int(input(" Set operations: "))
 		self.number_of_operants = int(input(" Set number of operants: "))
 		
@@ -340,10 +355,10 @@ class Settings:
 	def Print(self):
 		print(" ---Settings---")
 		print("Difficulty: ", self.difficulty);
-		print("Number of operants: ", self.number_of_operants);
-		print("Min: ", self.minimum);
-		print("Max: ", self.maximum);
-		print("Number of examples: ", self.number_of_examples);
+		print("Number of operants: ", self.number_of_operants)
+		print("Min: ", self.minimum)
+		print("Max: ", self.maximum)
+		print("Number of examples: ", self.number_of_examples)
 	
 	# vytiskne vsechny vygenerovna priklady	
 	def Print_examples(self):
@@ -353,6 +368,8 @@ class Settings:
 	def Save_all(self):
 		file = open('all.txt', 'w')
 		for i in range(self.number_of_examples):
+			file.write(self.name)
+			file.write("-")
 			file.write(str(i))
 			file.write(":	")
 			file.write(self.examples[i].Print_to_string_all() )
@@ -362,6 +379,8 @@ class Settings:
 	def Save_examples(self):
 		file = open('examples.txt', 'w')
 		for i in range(self.number_of_examples):
+			file.write(self.name)
+			file.write("-")
 			file.write(str(i))
 			file.write(":	")
 			file.write(self.examples[i].Print_to_string_examples() )
@@ -371,6 +390,8 @@ class Settings:
 	def Save_results(self):
 		file = open('results.txt', 'w')
 		for i in range(self.number_of_examples):
+			file.write(self.name)
+			file.write("-")
 			file.write(str(i))
 			file.write(":	")
 			file.write(self.examples[i].Print_to_string_results() )
