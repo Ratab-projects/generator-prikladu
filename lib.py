@@ -1,6 +1,7 @@
 import random
+import math
 
-DEBUG = True
+DEBUG = False
 
 operations = "+-*/"
 
@@ -124,14 +125,15 @@ def hardGener(settings):
 def Solve(operation, index1, index2):
 	# vnitrek
 	if len(operation) > 3:
-		#easyEval(operation, index1+1, index2-1)
-		operation.insert(index1+1, easyEval(operation) )
+		if DEBUG:
+			print("Idx1:", index1+1, "idx2:", index2-1)
+		operation.insert(index1+1, easyEval(operation, index1+1, index2-1) )
 	
 	# vnejsek
-	elif operation[index1] == "sin(":
-		operation[index1+1] = sin(operation[index1+1])
+	if operation[index1] == "sin(":
+		operation[index1+1] = math.sin(operation[index1+1])
 	elif operation[index1] == "cos(":
-		operation[index1+1] = cos(operation[index1+1])
+		operation[index1+1] = math.cos(operation[index1+1])
 	
 	# ostraneni zavorek
 	del operation[index1]
@@ -139,26 +141,35 @@ def Solve(operation, index1, index2):
 	
 
 def hardEval(operation):
-	print(operation)
 	if DEBUG:
 		print(" ---Hard eval---")
-		print(operation)
 	hard = ["sin(", "cos(", "("]
 	i = 0
-	while i < len(operation)-1:
+	while i < len(operation):
 		if operation[i] == ')':
 			idx1 = 0
 			idx2 = i
 			for j in range(idx2-1, idx1, -1):
-				if operation[i] is hard:
-					idx2 = j
+				if DEBUG:
+					print(j)
+				if operation[j] in hard:
+					idx1 = j
+					if DEBUG:
+						print("Hard operation:", operation[j], "on index:", j, ") on index:", i)
 					break
 			Solve(operation, idx1, idx2)
+			#if DEBUG:
+			print(operation)
 			i = 0
 		else:
 			i = i +1
-			
-	return result
+	if len(operation) > 1:
+		return easyEval(operation, 0, len(operation)-1)
+	
+	if DEBUG:
+		print("operation out")
+		print(operation)
+	return operation[0]
 
 def easyGener(settings):
 	operation = []
@@ -173,21 +184,24 @@ def easyGener(settings):
 def Compute(param1, operation, param2):
 	if operation == "+":
 		result = param1+param2
-	if operation == "-":
+	elif operation == "-":
 		result = param1-param2
-	if operation == "*":
+	elif operation == "*":
 		result = param1*param2
-	if operation == "/":
+	elif operation == "/":
 		result = param1/param2
+	else:
+		print("ERROR: operation:", operation)
 	
 	return result
 
 
-def easyEval(operation):		# TODO
-	queue = operation
-	i = 1
-	while i < len(queue)-1:
-		#print(" Index: ", i, "/", len(queue))
+def easyEval(queue, index1, index2):		# TODO
+	i = index1+1
+	j = len(queue)-1-index2
+	while i < len(queue)-1-j:
+		if DEBUG:
+			print(" Index: ", i, "/", len(queue)-1-j)
 		if queue[i] == "*" or queue[i] == "/":
 			param1 = queue[i-1]
 			operation = queue[i]
@@ -198,13 +212,15 @@ def easyEval(operation):		# TODO
 			queue.insert(i-1, Compute(param1, operation, param2) )
 		else:
 			i = i+2
-		#for operant in queue:
-		#	print (operant,"", end='')
-		#print("")
+		if DEBUG:
+			for operant in queue:
+				print (operant,"", end='')
+			print("")
 	
-	i = 1
-	while i < len(queue)-1:
-		#print(" Index: ", i, "/", len(queue))
+	i = index1+1
+	while i < len(queue)-1-j:
+		if DEBUG:
+			print(" Index: ", i, "/", len(queue)-1-j)
 		param1 = queue[i-1]
 		operation = queue[i]
 		param2 = queue[i+1]
@@ -212,11 +228,14 @@ def easyEval(operation):		# TODO
 		del queue[i-1]
 		del queue[i-1]
 		queue.insert(i-1, Compute(param1, operation, param2) )
-		#for operant in queue:
-		#	print (operant,"", end='')
-		#print("")
+		if DEBUG:
+			for operant in queue:
+				print (operant,"", end='')
+			print("")
 	
-	return queue.pop()
+	result = queue[index1]
+	del queue[index1]
+	return result
 	
 class Example:
 	def __init__(self):
@@ -231,9 +250,9 @@ class Example:
 			self.operation = hardGener(settings);
 	
 	# vypocita vygenerovany priklad
-	def Evaluate(self):
+	def Evaluate(self, settings):
 		if settings.difficulty == 1:
-			self.result = easyEval(self.operation.copy())
+			self.result = easyEval(self.operation.copy(), 0, len(self.operation)-1)
 		elif settings.difficulty == 2:
 			self.result = hardEval(self.operation.copy());
 	
@@ -291,22 +310,5 @@ class Settings:
 		for i in range(self.number_of_examples):
 			self.examples[i].Print()
 		
-	
-settings = Settings()
-settings.Set()
-#settings.Print()
 
-print(" ---Examples---")
-for i in range(settings.number_of_examples):
-	example = Example()
-	example.Generate(settings)
-	example.Print()
-	example.Evaluate()
-	settings.examples.append(example)
-	
-settings.Print_examples()
-
-
-
-settings.Kill()
 
