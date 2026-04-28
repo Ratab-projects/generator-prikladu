@@ -1,19 +1,8 @@
 import random
-# random.randint(a, b)
+
+DEBUG = True
 
 operations = "+-*/"
-
-"""
-unary_operators = [ ["sinus", "sin(", ")"], 
-					["cosinus", "cos(", ")"], 
-					["brackets", "(", ")"] ]
-					
-binary_operators =[ ["plus", "+"], 
-					["minus", "-"], 
-					["multiplay", "*"],
-					["divide", "/"] ]
-"""
-
 
 #				[name, number of operands, charakter(1/2 parts)]
 operators =   [ ["sinus", 1, "sin(", ")"], 
@@ -29,53 +18,147 @@ class Operation:
 		self.operator = []
 		self.operands_index = []
 		self.leaf = True
-	
+		
+	def Print(self):
+		print("Operator:", self.operator, "branches:", self.operands_index, "	is leaf?", self.leaf)
 
+def makeLeaf(operation, idx):
+	# je to list
+	#if operation[idx].leaf == True:
+	#	return operation[idx].operator
+	# je to vetveni
+	if operation[idx].leaf == False:
+		if len(operation[idx].operands_index) == 1:
+			operation[idx].operator.insert(1, makeLeaf(operation, operation[idx].operands_index[0]))
+		elif len(operation[idx].operands_index) == 2:
+			operation[idx].operator.insert(0, makeLeaf(operation, operation[idx].operands_index[0]))
+			operation[idx].operator.insert(2, makeLeaf(operation, operation[idx].operands_index[1]))
+			#operation[idx].Insert_operator(2, makeLeaf(operation, operation[idx].operands_index[1]))
+			#operation[idx].Insert_operator(0, makeLeaf(operation, operation[idx].operands_index[0]))
+		
+	return operation[idx].operator
+	
+def Colaps(operation):
+	example = []
+	example = makeLeaf(operation, 0)
+	return example
+
+def One_array(struct):
+	tangled = True
+	while tangled:
+		i = 0
+		tangled = False
+		while i < len(struct):
+			if isinstance(struct[i], list) and len(struct[i]) == 3:
+				tangled = True
+				for j in range(len(struct[i])):
+					struct.insert(j+i+1, struct[i][j])
+				del struct[i]
+			# aktualizace
+			i = i +1
+			
+	return struct
+	
 def hardGener(settings):
 	operation = []
 	leafs = 1
 	idx = 0
 	# generate
 	if settings.number_of_operants >= 2:
-		operation.append(Operation)
+		operation.append(Operation())
+		#operation[0].Print()
 	while leafs < settings.number_of_operants:
 		operator = random.choice(operators)
-		print("Index:", idx, "operace:", operator)
-		operation[idx].operator = operator[0]
-		print("Index:", idx, "operace:", operation[idx].operator)
-		operation[idx].leaf = False
+		#operation[idx].operator.append(operator[0])
+		
+		#print("Index:", idx, ":", end='')
+		#operation[idx].Print()
 		leafs = leafs -1
 		if operator[1] == 1:	# unary
+			operation[idx].operator.append(operator[2])
+			operation[idx].operator.append(operator[3])
+			operation[idx].leaf = False
 			leafs = leafs +1
-			operation.append(Operation)
-			operation[idx].operands_index = len(operation)-1
+			operation.append(Operation())
+			operation[idx].operands_index.append(len(operation)-1)
 		elif operator[1] == 2:	# binary
+			operation[idx].operator.append(operator[2])
+			operation[idx].leaf = False
 			leafs = leafs +2
-			operation.append(Operation)
-			operation[idx].operands_index = len(operation)-1
-			operation.append(Operation)
-			operation[idx].operands_index = len(operation)-1
+			operation.append(Operation())
+			operation[idx].operands_index.append(len(operation)-1)
+			operation.append(Operation())
+			operation[idx].operands_index.append(len(operation)-1)
+		
 		# aktualizace
 		idx = idx +1
-		
-	for i in range(len(operation)):
-		print("Index:", i, operation[i].operator)
+		#operation[idx-1].Print()
 			
 	# set leafs
 	while leafs > 0:
 		operation[idx].operator = random.randint(settings.minimum, settings.maximum)
-		operation[idx].leaf = False
 		#aktualizace
 		idx = idx +1
 		leafs = leafs -1
-	
-	for operation_to_print in operation:
-		print(operation_to_print.operator)
+		
+	# kontrolni tisk
+	for i in range(len(operation)):
+		print("Index:", i, ":", end='')
+		operation[i].Print()
 	
 	# colaps
+	if DEBUG:
+		print(" ---Colpas--")
+	example = []
+	example = Colaps(operation)
+	print(example)
+	if DEBUG:
+		print(" ---One array--")
+	array = []
+	array = One_array(example)
+	print(array)
+	#exit()	# TODO
 	
-	return operation[0].operator
+	return array
 
+def Solve(operation, index1, index2):
+	# vnitrek
+	if len(operation) > 3:
+		#easyEval(operation, index1+1, index2-1)
+		operation.insert(index1+1, easyEval(operation) )
+	
+	# vnejsek
+	elif operation[index1] == "sin(":
+		operation[index1+1] = sin(operation[index1+1])
+	elif operation[index1] == "cos(":
+		operation[index1+1] = cos(operation[index1+1])
+	
+	# ostraneni zavorek
+	del operation[index1]
+	del operation[index1+1]
+	
+
+def hardEval(operation):
+	print(operation)
+	if DEBUG:
+		print(" ---Hard eval---")
+		print(operation)
+	hard = ["sin(", "cos(", "("]
+	i = 0
+	while i < len(operation)-1:
+		if operation[i] == ')':
+			idx1 = 0
+			idx2 = i
+			for j in range(idx2-1, idx1, -1):
+				if operation[i] is hard:
+					idx2 = j
+					break
+			Solve(operation, idx1, idx2)
+			i = 0
+		else:
+			i = i +1
+			
+	return result
 
 def easyGener(settings):
 	operation = []
@@ -101,7 +184,7 @@ def Compute(param1, operation, param2):
 
 
 def easyEval(operation):		# TODO
-	queue = operation.copy()
+	queue = operation
 	i = 1
 	while i < len(queue)-1:
 		#print(" Index: ", i, "/", len(queue))
@@ -149,7 +232,10 @@ class Example:
 	
 	# vypocita vygenerovany priklad
 	def Evaluate(self):
-		self.result = easyEval(self.operation)
+		if settings.difficulty == 1:
+			self.result = easyEval(self.operation.copy())
+		elif settings.difficulty == 2:
+			self.result = hardEval(self.operation.copy());
 	
 	# vytiskne 
 	def Print(self):
@@ -176,6 +262,7 @@ class Settings:
 		
 	# nacte nove paramtery z terminalu	
 	def Set(self):
+		print(" ---Settings--")
 		print("Set input parameters")
 		
 		# number interval
@@ -184,7 +271,7 @@ class Settings:
 		self.maximum = int(input(" Set max: "))
 		
 		# operace
-		print("Operations (1: +/-/*/: | 2: all)");
+		print("Operations (1: +/-/*/: | 2: all+sin()+cos() )");
 		self.difficulty = int(input(" Set operations: "))
 		self.number_of_operants = int(input(" Set number of operants: "))
 		
